@@ -39,6 +39,9 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <math.h>
+
+const double GRAVITY = 9.80665;
 
 namespace vesc_driver
 {
@@ -209,6 +212,7 @@ void VescDriver::vescPacketCallback(const std::shared_ptr<VescPacket const> & pa
     auto std_imu_msg = Imu();
     imu_msg.header.stamp = now();
     std_imu_msg.header.stamp = now();
+    std_imu_msg.header.frame_id = "vesc_frame";
 
     imu_msg.imu.ypr.x = imuData->roll();
     imu_msg.imu.ypr.y = imuData->pitch();
@@ -231,13 +235,13 @@ void VescDriver::vescPacketCallback(const std::shared_ptr<VescPacket const> & pa
     imu_msg.imu.orientation.y = imuData->q_y();
     imu_msg.imu.orientation.z = imuData->q_z();
 
-    std_imu_msg.linear_acceleration.x = imuData->acc_x();
-    std_imu_msg.linear_acceleration.y = imuData->acc_y();
-    std_imu_msg.linear_acceleration.z = imuData->acc_z();
+    std_imu_msg.linear_acceleration.x = imuData->acc_x() * GRAVITY;
+    std_imu_msg.linear_acceleration.y = imuData->acc_y() * GRAVITY;
+    std_imu_msg.linear_acceleration.z = imuData->acc_z() * GRAVITY;
 
-    std_imu_msg.angular_velocity.x = imuData->gyr_x();
-    std_imu_msg.angular_velocity.y = imuData->gyr_y();
-    std_imu_msg.angular_velocity.z = imuData->gyr_z();
+    std_imu_msg.angular_velocity.x = imuData->gyr_x() * M_PI / 360;
+    std_imu_msg.angular_velocity.y = imuData->gyr_y() * M_PI / 360;
+    std_imu_msg.angular_velocity.z = imuData->gyr_z() * M_PI / 360;
 
     std_imu_msg.orientation.w = imuData->q_w();
     std_imu_msg.orientation.x = imuData->q_x();
